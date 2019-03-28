@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import publicPage from '@/components/publicPage'
-// import home from './home/index'
-import homePage from '@/views/home/index.vue'
-import loginPage from '@/views/login/index.vue'
+import home from './home'
+// import homePage from '@/views/home/index.vue'
+import login from './login'
+import streetSnapManagement from './streetSnapManagement'
 Vue.use(Router)
 
 export default new Router({
@@ -14,16 +15,9 @@ export default new Router({
       name: 'HelloWorld',
       component: publicPage,
       children: [
-        {
-          name: 'home',
-          path: 'home',
-          component: homePage
-        },
-        {
-          path: 'login',
-          name: 'login',
-          component: loginPage
-        }
+        home,
+        login,
+        streetSnapManagement
       ]
     }
   ]

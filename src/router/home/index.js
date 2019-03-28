@@ -1,16 +1,8 @@
-import homePage from '@/views/home/index'
-import view from './view'
+import homePage from '@/views/home'
+
 const home = {
   path: 'home',
   name: 'home',
-  component: view,
-  children: [
-    {
-      path: 'item',
-      name: 'itemPage',
-      component: homePage
-    }
-  ]
-
+  component: homePage
 }
 export default home
