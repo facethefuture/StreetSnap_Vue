@@ -6,8 +6,7 @@ import home from './home'
 import login from './login'
 import streetSnapManagement from './streetSnapManagement'
 Vue.use(Router)
-
-export default new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {
@@ -22,3 +21,9 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title
+  localStorage.setItem('activeIndex', to.meta.activeIndex)
+  next()
+})
+export default router

@@ -41,6 +41,10 @@ export default {
       activeIndex: '1'
     }
   },
+  created () {
+    window.addEventListener('popstate', this.changeActiveIndex)
+    this.activeIndex = this.$route.meta.activeIndex
+  },
   methods: {
     handleSelect (key, keyPath) {
       console.log(key, keyPath)
@@ -54,10 +58,18 @@ export default {
 
           break
       }
+      console.log('zhixing')
+      this.activeIndex = localStorage.getItem('activeIndex') ? localStorage.getItem('activeIndex') : '1'
       // if (key === 1) {
       //   this.$router.push(name: 'home')
       // } else {}
+    },
+    changeActiveIndex () {
+      console.log('后退事件')
+      this.activeIndex = this.$route.meta.activeIndex
     }
+  },
+  watch: {
   }
 }
 </script>
