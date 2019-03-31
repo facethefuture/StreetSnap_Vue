@@ -1,6 +1,6 @@
 import streetSnapManagementPage from '@/views/streetSnapManagement'
 const streetSnapManagement = {
-  path: 'streetSnapManagement',
+  path: '/streetSnapManagement',
   name: 'streetSnapManagement',
   component: streetSnapManagementPage,
   meta: {

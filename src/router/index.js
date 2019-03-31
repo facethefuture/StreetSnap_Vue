@@ -13,12 +13,30 @@ const router = new Router({
       path: '/',
       name: 'HelloWorld',
       component: publicPage,
+      redirect: {name: 'home'},
       children: [
         home,
-        login,
         streetSnapManagement
-      ]
-    }
+      ],
+      beforeEnter (to, from, next) {
+        if (localStorage.getItem('Authorization') && localStorage.getItem('jwtDate')) {
+          let jwtDate = localStorage.getItem('jwtDate')
+          let now = new Date().getTime()
+          let outOfDate = now - jwtDate > 1000 * 60 * 60 * 10
+          if (outOfDate) {
+            console.log('jwt过期了')
+            next({ path: '/login' })
+          } else {
+            console.log('jwt未过期')
+          }
+          next()
+        } else {
+          console.log('没有登陆')
+          next({ path: '/login' })
+        }
+      }
+    },
+    login
   ]
 })
 router.beforeEach((to, from, next) => {

@@ -1,7 +1,7 @@
 import homePage from '@/views/home'
 
 const home = {
-  path: 'home',
+  path: '/home',
   name: 'home',
   component: homePage,
   meta: {

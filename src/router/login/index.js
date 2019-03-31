@@ -1,7 +1,10 @@
 import loginPage from '@/views/login'
 const login = {
-  path: 'login',
+  path: '/login',
   name: 'login',
-  component: loginPage
+  component: loginPage,
+  meta: {
+    title: '登陆'
+  }
 }
 export default login

@@ -1,6 +1,6 @@
 <template>
     <div>
-      <div class="block date-picker">
+      <div class="block" :class="$style['date-picker']">
         <el-date-picker
           v-model="value6"
           type="daterange"
@@ -16,17 +16,17 @@
         <el-table
           :data="tableData"
           style="width: 100%"
-          class="table"
+          :class="$style.table"
         >
           <el-table-column
             label="封面"
             width="180">
             <template slot-scope="scope">
               <el-popover trigger="hover" placement="top">
-                <p>姓名: {{ scope.row.name }}</p>
-                <p>住址: {{ scope.row.address }}</p>
+                <img :class="$style['cover-image-popover']" :src="host.host + scope.row.coverImage"/>
                 <div slot="reference" class="name-wrapper">
-                  <el-tag size="medium">{{ scope.row.name }}</el-tag>
+                  <!--<el-tag size="medium">{{ scope.row.name }}</el-tag>-->
+                  <img :class="$style['cover-image']" :src="host.host + scope.row.coverImage"/>
                 </div>
               </el-popover>
             </template>
@@ -35,50 +35,44 @@
             label="日期"
             width="180">
             <template slot-scope="scope">
-              <i class="el-icon-time"></i>
-              <span style="margin-left: 10px">{{ scope.row.date }}</span>
+              <span>{{ scope.row.createdTime }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="姓名"
             width="180">
             <template slot-scope="scope">
-              <el-popover trigger="hover" placement="top">
-                <p>姓名: {{ scope.row.name }}</p>
-                <p>住址: {{ scope.row.address }}</p>
-                <div slot="reference" class="name-wrapper">
-                  <el-tag size="medium">{{ scope.row.name }}</el-tag>
-                </div>
-              </el-popover>
+              <div>{{scope.row.title}}</div>
             </template>
           </el-table-column>
           <el-table-column
             label="描述"
             width="180">
             <template slot-scope="scope">
-              <el-popover trigger="hover" placement="top">
-                <p>姓名: {{ scope.row.name }}</p>
-                <p>住址: {{ scope.row.address }}</p>
-                <div slot="reference" class="name-wrapper">
-                  <el-tag size="medium">{{ scope.row.name }}</el-tag>
-                </div>
-              </el-popover>
+              <div>{{scope.row.description}}</div>
             </template>
           </el-table-column>
           <el-table-column
             label="标签"
             width="180">
             <template slot-scope="scope">
-              <el-popover trigger="hover" placement="top">
-                <p>姓名: {{ scope.row.name }}</p>
-                <p>住址: {{ scope.row.address }}</p>
-                <div slot="reference" class="name-wrapper">
-                  <el-tag size="medium">{{ scope.row.name }}</el-tag>
-                </div>
-              </el-popover>
+              <div>
+                {{scope.row.tags}}
+              </div>
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column
+            label="标签"
+            width="">
+            <template slot-scope="scope">
+              <el-switch
+                v-model="scope.row.status"
+                active-color="#13ce66"
+                inactive-color="#ff4949">
+              </el-switch>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200">
             <template slot="header" slot-scope="scope">
               <el-input
                 v-model="search"
@@ -104,10 +98,10 @@
           <el-pagination
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
-            :current-page.sync="currentPage3"
-            :page-size="100"
+            :current-page.sync="currentPage"
+            :page-size="10"
             layout="prev, pager, next, jumper"
-            :total="1000">
+            :total="total">
           </el-pagination>
         </div>
       </div>
@@ -115,6 +109,7 @@
 </template>
 
 <script>
+import host from '@/common/host'
 export default {
   name: 'index',
   data () {
@@ -138,8 +133,14 @@ export default {
         name: '王小虎',
         address: '上海市普陀区金沙江路 1516 弄'
       }],
-      currentPage3: 1
+      currentPage: 1,
+      total: 1,
+      host: host,
+      switchValue: false
     }
+  },
+  created () {
+    this.getList()
   },
   methods: {
     handleEdit (index, row) {
@@ -153,12 +154,47 @@ export default {
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
+    },
+    getList (page = 1) {
+      this.$axios({
+        method: 'GET',
+        url: '/api/hotRecommend',
+        params: {
+          page: page
+        },
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': localStorage.getItem('Authorization')
+        }
+      }).then((data, status) => {
+        console.log(data)
+        let res = data.data
+        res.dataList.forEach((item) => {
+          item.createdTime = this.dateFormat(item.createdTime)
+        })
+        this.tableData = res.dataList
+        this.currentPage = res.currentPage
+        this.total = res.totalRecord
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
+    dateFormat (val) {
+      if (val) {
+        let time = new Date(val * 1000)
+        let year = time.getFullYear()
+        let month = (time.getMonth() + 1) > 9 ? time.getMonth() + 1 : '0' + (time.getMonth() + 1)
+        let date = time.getDate() > 9 ? time.getDate() : '0' + time.getDate()
+        return `${year}-${month}-${date}`
+      } else {
+        return ''
+      }
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" module>
   .date-picker{
     display: flex;
     justify-content: flex-end;
@@ -167,11 +203,35 @@ export default {
   }
   .table{
     background: yellow;
+    table{
+      thead{
+        th{
+          div{
+            padding-left: 0;
+          }
+        }
+      }
+      tbody{
+        tr{
+          /*height: 200px;*/
+          td{
+            /*height: 200px;*/
+          }
+        }
+      }
+    }
   }
-  .table table {}
   .page-block{
     display: flex;
     justify-content: flex-end;
     margin: 20px 0;
+  }
+  .cover-image{
+    height: 100px;
+    width: 100px;
+  }
+  .cover-image-popover{
+    /*width: 300px;*/
+    height: 300px;
   }
 </style>
