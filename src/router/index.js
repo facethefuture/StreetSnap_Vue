@@ -5,6 +5,8 @@ import home from './home'
 // import homePage from '@/views/home/index.vue'
 import login from './login'
 import streetSnapManagement from './streetSnapManagement'
+import photographyManagement from './photographyManagement'
+import post from './post'
 Vue.use(Router)
 const router = new Router({
   mode: 'history',
@@ -16,7 +18,9 @@ const router = new Router({
       redirect: {name: 'home'},
       children: [
         home,
-        streetSnapManagement
+        streetSnapManagement,
+        photographyManagement,
+        post
       ],
       beforeEnter (to, from, next) {
         if (localStorage.getItem('Authorization') && localStorage.getItem('jwtDate')) {

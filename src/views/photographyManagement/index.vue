@@ -1,7 +1,7 @@
 <template>
     <div>
       <div class="block" :class="$style['date-picker']">
-        <div @click="switchToPost"> <el-button type="primary" round><img src="../../assets/fabu.svg" /><span>发布街拍</span></el-button>
+        <div> <el-button type="primary" round><img src="../../assets/fabu.svg" /><span>发布摄影</span></el-button>
         </div>
         <el-date-picker
           v-model="value6"
@@ -191,8 +191,6 @@ export default {
       } else {
         return ''
       }
-    },
-    switchToPost () {
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <div class="public-page">
+  <div :class="$style.container">
+    <div :class="$style['public-page']">
       <div>
         <el-menu
           :default-active="activeIndex"
@@ -12,9 +12,9 @@
           active-text-color="#ffd04b">
           <el-menu-item index="1">首页</el-menu-item>
           <el-submenu index="2">
-            <template slot="title">我的工作台</template>
-            <el-menu-item index="2-1">选项1</el-menu-item>
-            <el-menu-item index="2-2">选项2</el-menu-item>
+            <template slot="title">图片</template>
+            <el-menu-item index="2-1">街拍</el-menu-item>
+            <el-menu-item index="2-2">摄影</el-menu-item>
             <el-menu-item index="2-3">选项3</el-menu-item>
             <el-submenu index="2-4">
               <template slot="title">选项4</template>
@@ -57,6 +57,10 @@ export default {
           this.$router.push({name: 'streetSnapManagement'})
 
           break
+        case '2-2':
+          this.$router.push({name: 'photographyManagement'})
+
+          break
       }
       console.log('zhixing')
       this.activeIndex = localStorage.getItem('activeIndex') ? localStorage.getItem('activeIndex') : '1'
@@ -75,13 +79,14 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" module>
 h1, h2 {
   font-weight: normal;
 }
 ul {
   list-style-type: none;
   padding: 0;
+
 }
 li {
   display: inline-block;
@@ -101,5 +106,8 @@ a {
   .public-page{
     max-width: 1200px;
     margin: 0 auto;
+    ul{
+      margin-top: 5px;
+    }
   }
 </style>

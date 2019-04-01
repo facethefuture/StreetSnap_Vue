@@ -87,8 +87,10 @@ export default {
   &>div{
     background: url("../../assets/login.jpg") no-repeat center;
     background-size: 100% 100%;
-    width: 1200px;
-    height: 735px;
+    height: 80%;
+    width: 80%;
+    max-width: 1200px;
+    max-height: 735px;
     display: flex;
     justify-content: center;
     align-items: center;
