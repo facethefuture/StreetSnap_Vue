@@ -4,8 +4,8 @@ import publicPage from '@/components/publicPage'
 import home from './home'
 // import homePage from '@/views/home/index.vue'
 import login from './login'
-import streetSnapManagement from './streetSnapManagement'
-import photographyManagement from './photographyManagement'
+import streetSnap from './streetSnap'
+import photography from './photography'
 import post from './post'
 Vue.use(Router)
 const router = new Router({
@@ -18,8 +18,8 @@ const router = new Router({
       redirect: {name: 'home'},
       children: [
         home,
-        streetSnapManagement,
-        photographyManagement,
+        streetSnap,
+        photography,
         post
       ],
       beforeEnter (to, from, next) {
