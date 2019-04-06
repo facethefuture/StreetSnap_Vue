@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 // import router from 'vue-router'
 // import host from './host'
 // axios.defaults.headers.common['Authorization'] = localStorage.getItem('Authorization')
@@ -6,6 +7,10 @@ import axios from 'axios'
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('Authorization')
 
 axios.interceptors.request.use(config => {
+  // POST传参序列化
+  if (config.method === 'post') {
+    config.data = qs.stringify(config.data)
+  }
   return config
 }, err => {
   return Promise.reject(err)

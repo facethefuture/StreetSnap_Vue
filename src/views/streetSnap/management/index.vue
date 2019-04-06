@@ -1,9 +1,10 @@
 <template>
     <div>
       <div class="block" :class="$style['date-picker']">
-        <div> <el-button type="primary" round><img src="../../assets/fabu.svg" /><span>发布摄影</span></el-button>
+        <div @click="switchToPost"> <el-button type="primary" round><img src="../../../assets/fabu.svg" /><span>发布街拍</span></el-button>
         </div>
         <el-date-picker
+          @change="changeDate"
           v-model="value6"
           type="daterange"
           range-separator="至"
@@ -41,7 +42,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="姓名"
+            label="照片名"
             width="180">
             <template slot-scope="scope">
               <div>{{scope.row.title}}</div>
@@ -50,6 +51,13 @@
           <el-table-column
             label="描述"
             width="180">
+            <template slot="header" slot-scope="scope">
+              <div>描述</div><el-input
+                @change="valiedateParams"
+                v-model="description"
+                size="mini"
+                placeholder="输入关键字搜索"/>
+            </template>
             <template slot-scope="scope">
               <div>{{scope.row.description}}</div>
             </template>
@@ -59,29 +67,24 @@
             width="180">
             <template slot-scope="scope">
               <div>
-                {{scope.row.tags}}
+                <div v-for="item in scope.row.tags" :key="item" :class="$style.tag">
+                  {{item}}
+                </div>
               </div>
             </template>
           </el-table-column>
           <el-table-column
-            label="标签"
+            label="状态"
             width="">
             <template slot-scope="scope">
               <el-switch
-                v-model="scope.row.status"
+                v-model="scope.row.enable"
                 active-color="#13ce66"
-                inactive-color="#ff4949">
+                @change="switchStatus(scope.row)">
               </el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200">
-            <template slot="header" slot-scope="scope">
-              <el-input
-                v-model="search"
-                size="mini"
-                placeholder="输入关键字搜索"/>
-            </template>
-
+          <el-table-column label="编辑" width="200">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -116,7 +119,7 @@ export default {
   name: 'index',
   data () {
     return {
-      value6: '',
+      value6: [],
       search: '',
       tableData: [{
         date: '2016-05-02',
@@ -138,10 +141,17 @@ export default {
       currentPage: 1,
       total: 1,
       host: host,
-      switchValue: false
+      switchValue: false,
+      params: {
+        page: 1,
+        enable: 0
+      },
+      description: '',
+      tag: ''
     }
   },
   created () {
+    this.initDate()
     this.getList()
   },
   methods: {
@@ -156,23 +166,25 @@ export default {
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
+      this.currentPage = val
+      this.valiedateParams()
     },
     getList (page = 1) {
       this.$axios({
         method: 'GET',
         url: '/api/hotRecommend',
-        params: {
-          page: page
-        },
-        headers: {
-          'content-type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
-        }
+        params: this.params
+        // headers: {
+        //   'content-type': 'application/json',
+        //   'Authorization': localStorage.getItem('Authorization')
+        // }
       }).then((data, status) => {
         console.log(data)
         let res = data.data
         res.dataList.forEach((item) => {
           item.createdTime = this.dateFormat(item.createdTime)
+          item.enable = item.enable === '1'
+          item.tags = JSON.parse(item.tags)
         })
         this.tableData = res.dataList
         this.currentPage = res.currentPage
@@ -191,6 +203,81 @@ export default {
       } else {
         return ''
       }
+    },
+    switchToPost () {
+      this.$router.push({name: 'streetSnapPost'})
+    },
+    switchStatus (e) {
+      console.log(e)
+      let enable = e.enable ? 1 : 0
+      this.updateStatus(e.id, enable)
+    },
+    valiedateParams () {
+      Reflect.set(this.params, 'page', this.currentPage)
+      if (!this.description.trim()) {
+        Reflect.deleteProperty(this.params, 'description')
+      } else {
+        Reflect.set(this.params, 'description', this.description)
+        Reflect.deleteProperty(this.params, 'tag')
+        this.tag = ''
+      }
+      if (!this.tag.trim()) {
+        Reflect.deleteProperty(this.params, 'tag')
+      } else {
+        Reflect.set(this.params, 'tag', this.tag)
+        Reflect.deleteProperty(this.params, 'description')
+        this.description = ''
+      }
+      console.log(this.params)
+      this.getList()
+    },
+    updateStatus (id, enable) {
+      console.log(id, enable)
+      // const data = new URLSearchParams()
+      // params.append('id', id)
+      // params.append('enable', enable)
+      this.$axios({
+        method: 'POST',
+        url: '/api/admin/updateHotRecommend',
+        data: {
+          id: id,
+          enable: enable
+        },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then((data) => {
+        console.log(data)
+        if (data.status === 200 && data.data === 'success') {
+          this.getList()
+        }
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
+    changeDate (val) {
+      console.log(val)
+      if (Array.isArray(val)) {
+        let startTime = new Date(val[0]).getTime()
+        let endTime = new Date(val[1]).getTime()
+        console.log(startTime, endTime)
+        Reflect.set(this.params, 'startTime', Number.parseInt(startTime / 1000))
+        Reflect.set(this.params, 'endTime', Number.parseInt(endTime / 1000))
+        this.getList()
+      } else {
+        this.initDate()
+        this.getList()
+      }
+    },
+    initDate () {
+      let today = new Date()
+      let start = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).getTime()
+      let end = today.getTime()
+      this.$nextTick(() => {
+        this.value6 = [start, end]
+      })
+      Reflect.set(this.params, 'startTime', Number.parseInt(start / 1000))
+      Reflect.set(this.params, 'endTime', Number.parseInt(end / 1000))
     }
   }
 }
@@ -229,6 +316,21 @@ export default {
             padding-left: 0;
           }
         }
+        th:nth-child(4),th:nth-child(5){
+          &>div{
+            padding-left: 0;
+            &>div:nth-child(1){
+              overflow: initial;
+              text-overflow: initial;
+            }
+            display: flex;
+            input{
+              width: 100px;
+              text-align: center;
+              padding: 0;
+            }
+          }
+        }
       }
       tbody{
         tr{
@@ -252,5 +354,21 @@ export default {
   .cover-image-popover{
     /*width: 300px;*/
     height: 300px;
+  }
+  .tag{
+    font-size: 16px;
+    vertical-align: middle;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 2px 5px;
+    font-family:Helvetica Neue, Helvetica, sans-serif;
+    border-radius: 12px;
+    background-color:#fbbd08;
+    color:#333;
+    margin-right: 3px;
+    text-align: center;
   }
 </style>
