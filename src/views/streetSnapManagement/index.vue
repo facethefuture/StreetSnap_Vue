@@ -41,7 +41,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="姓名"
+            label="照片名"
             width="180">
             <template slot-scope="scope">
               <div>{{scope.row.title}}</div>
@@ -50,6 +50,13 @@
           <el-table-column
             label="描述"
             width="180">
+            <template slot="header" slot-scope="scope">
+              <div>描述</div><el-input
+                @change="valiedateParams"
+                v-model="description"
+                size="mini"
+                placeholder="输入关键字搜索"/>
+            </template>
             <template slot-scope="scope">
               <div>{{scope.row.description}}</div>
             </template>
@@ -59,29 +66,24 @@
             width="180">
             <template slot-scope="scope">
               <div>
-                {{scope.row.tags}}
+                <div v-for="item in scope.row.tags" :key="item" :class="$style.tag">
+                  {{item}}
+                </div>
               </div>
             </template>
           </el-table-column>
           <el-table-column
-            label="标签"
+            label="状态"
             width="">
             <template slot-scope="scope">
               <el-switch
-                v-model="scope.row.status"
+                v-model="scope.row.enable"
                 active-color="#13ce66"
-                inactive-color="#ff4949">
+                @change="switchStatus(scope.row)">
               </el-switch>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="200">
-            <template slot="header" slot-scope="scope">
-              <el-input
-                v-model="search"
-                size="mini"
-                placeholder="输入关键字搜索"/>
-            </template>
-
+          <el-table-column label="编辑" width="200">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -138,7 +140,12 @@ export default {
       currentPage: 1,
       total: 1,
       host: host,
-      switchValue: false
+      switchValue: false,
+      params: {
+        page: 1
+      },
+      description: '',
+      tag: ''
     }
   },
   created () {
@@ -156,23 +163,25 @@ export default {
     },
     handleCurrentChange (val) {
       console.log(`当前页: ${val}`)
+      this.currentPage = val
+      this.valiedateParams()
     },
     getList (page = 1) {
       this.$axios({
         method: 'GET',
         url: '/api/hotRecommend',
-        params: {
-          page: page
-        },
-        headers: {
-          'content-type': 'application/json',
-          'Authorization': localStorage.getItem('Authorization')
-        }
+        params: this.params
+        // headers: {
+        //   'content-type': 'application/json',
+        //   'Authorization': localStorage.getItem('Authorization')
+        // }
       }).then((data, status) => {
         console.log(data)
         let res = data.data
         res.dataList.forEach((item) => {
           item.createdTime = this.dateFormat(item.createdTime)
+          item.enable = item.enable === '1'
+          item.tags = JSON.parse(item.tags)
         })
         this.tableData = res.dataList
         this.currentPage = res.currentPage
@@ -193,6 +202,28 @@ export default {
       }
     },
     switchToPost () {
+    },
+    switchStatus (e) {
+      console.log(e)
+    },
+    valiedateParams () {
+      Reflect.set(this.params, 'page', this.currentPage)
+      if (!this.description.trim()) {
+        Reflect.deleteProperty(this.params, 'description')
+      } else {
+        Reflect.set(this.params, 'description', this.description)
+        Reflect.deleteProperty(this.params, 'tag')
+        this.tag = ''
+      }
+      if (!this.tag.trim()) {
+        Reflect.deleteProperty(this.params, 'tag')
+      } else {
+        Reflect.set(this.params, 'tag', this.tag)
+        Reflect.deleteProperty(this.params, 'description')
+        this.description = ''
+      }
+      console.log(this.params)
+      this.getList()
     }
   }
 }
@@ -231,6 +262,21 @@ export default {
             padding-left: 0;
           }
         }
+        th:nth-child(4),th:nth-child(5){
+          &>div{
+            padding-left: 0;
+            &>div:nth-child(1){
+              overflow: initial;
+              text-overflow: initial;
+            }
+            display: flex;
+            input{
+              width: 100px;
+              text-align: center;
+              padding: 0;
+            }
+          }
+        }
       }
       tbody{
         tr{
@@ -254,5 +300,21 @@ export default {
   .cover-image-popover{
     /*width: 300px;*/
     height: 300px;
+  }
+  .tag{
+    font-size: 16px;
+    vertical-align: middle;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 2px 5px;
+    font-family:Helvetica Neue, Helvetica, sans-serif;
+    border-radius: 12px;
+    background-color:#fbbd08;
+    color:#333;
+    margin-right: 3px;
+    text-align: center;
   }
 </style>

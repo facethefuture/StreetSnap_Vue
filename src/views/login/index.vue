@@ -2,12 +2,12 @@
   <div :class="$style.container">
     <div>
       <div :class="$style.loginForm">
-        <el-form  :model="formLabelAlign">
-          <el-form-item label="">
-            <el-input v-model="formLabelAlign.username" required placeholder="用户名"></el-input>
+        <el-form  :model="formLabelAlign"  ref="ruleForm">
+          <el-form-item label="" prop="username" required>
+            <el-input v-model="formLabelAlign.username"   placeholder="用户名"></el-input>
           </el-form-item>
-          <el-form-item label="">
-            <el-input v-model="formLabelAlign.password" placeholder="密码" type="password"></el-input>
+          <el-form-item label="" prop="password" required>
+            <el-input v-model="formLabelAlign.password" @keyup.enter="doLogin" placeholder="密码" type="password"></el-input>
           </el-form-item>
           <el-form-item label="" :class="$style.loginIcon" >
             <div @click="doLogin">
@@ -44,29 +44,31 @@ export default {
       // }).catch((err) => {
       //   console.log(err)
       // })
-      this.$axios({
-        method: 'POST',
-        url: '/api/login',
-        data: {
-          username: this.formLabelAlign.username,
-          password: this.formLabelAlign.password
-        },
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded'
-        }
-      }).then(({status, data, headers}) => {
-        console.log(data)
-        console.log(status)
-        console.log(headers)
-        if (status === 200 && headers.authorization) {
-          localStorage.setItem('Authorization', headers.authorization)
-          let jwtDate = new Date().getTime()
-          localStorage.setItem('jwtDate', jwtDate)
+      this.$refs.ruleForm.validate((valid) => {
+        if (valid) {
+          alert('submit!')
+          const params = new URLSearchParams()
+          params.append('username', this.formLabelAlign.username)
+          params.append('password', this.formLabelAlign.password)
+          this.$axios.post('/api/login', params).then(({status, data, headers}) => {
+            console.log(data)
+            console.log(status)
+            console.log(headers)
+            if (status === 200 && headers.authorization) {
+              localStorage.setItem('Authorization', headers.authorization)
+              let jwtDate = new Date().getTime()
+              localStorage.setItem('jwtDate', jwtDate)
+              this.$router.replace({name: 'home'})
+            } else {
+              // this.
+            }
+          }).catch((msg) => {
+            console.log(msg)
+          })
         } else {
-          // this.
+          console.log('error submit!!')
+          return false
         }
-      }).catch((msg) => {
-        console.log(msg)
       })
     }
   }
@@ -106,10 +108,16 @@ export default {
   /*left: 50%;*/
   opacity: 100%;
   z-index: 100;
+  .el-form-item__error{
+    color: yellow;
+  }
   form{
     &>div{
       &>div{
         margin-left: 37px!important;
+        &>div:nth-child(2){
+          color: yellow;
+        }
       }
     }
   }

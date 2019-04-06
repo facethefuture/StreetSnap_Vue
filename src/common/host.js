@@ -1,4 +1,4 @@
 const host = {
-  host: 'https://localhost'
+  host: 'http://localhost'
 }
 export default host
