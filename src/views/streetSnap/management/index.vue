@@ -184,7 +184,7 @@ export default {
         res.dataList.forEach((item) => {
           item.createdTime = this.dateFormat(item.createdTime)
           item.enable = item.enable === '1'
-          item.tags = JSON.parse(item.tags)
+          item.tags = Array.isArray(item.tags) ? JSON.parse(item.tags) : []
         })
         this.tableData = res.dataList
         this.currentPage = res.currentPage
