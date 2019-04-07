@@ -46,11 +46,14 @@ export default {
       // })
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
-          alert('submit!')
-          const params = new URLSearchParams()
-          params.append('username', this.formLabelAlign.username)
-          params.append('password', this.formLabelAlign.password)
-          this.$axios.post('/api/login', params).then(({status, data, headers}) => {
+          // const params = new URLSearchParams()
+          // params.append('username', this.formLabelAlign.username)
+          // params.append('password', this.formLabelAlign.password)
+          let data = {
+            username: this.formLabelAlign.username,
+            password: this.formLabelAlign.password
+          }
+          this.$axios.post('/api/login', data).then(({status, data, headers}) => {
             console.log(data)
             console.log(status)
             console.log(headers)
